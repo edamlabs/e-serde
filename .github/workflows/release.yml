@@ -71,7 +71,7 @@ jobs:
         if: inputs.tag == ''
         env:
           TAG: ${{ steps.next.outputs.tag }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app.outputs.token }}
         run: |
           BRANCH="chore/release-${TAG#v}"
           sed -i "0,/^version = \"[0-9]*\.[0-9]*\.[0-9]*\"/s//version = \"${TAG#v}\"/" Cargo.toml
@@ -91,12 +91,9 @@ jobs:
           git add Cargo.toml Cargo.lock uv.lock CHANGELOG.md
           git commit -m "chore(release): $TAG"
           git push -f origin "$BRANCH"
-          PR=$(gh pr create -B main -H "$BRANCH" --title "chore(release): $TAG" --body "Automated release bump. Squash-merges itself once CI is green." 2>/dev/null | tail -n1 | awk -F/ '{print $NF}')
+          PR=$(gh pr create -B main -H "$BRANCH" --title "chore(release): $TAG" --body "Automated release bump. Squash-merges itself once CI is green." | tail -n1 | awk -F/ '{print $NF}')
           PR=${PR:-$(gh pr view "$BRANCH" --json number -q .number)}
           [ -n "$PR" ] || { echo "::error::could not open or find the release PR" >&2; exit 1; }
-          ### GitHub suppresses CI on PRs opened by GITHUB_TOKEN: re-push as the GitHub App (one disposable commit, absorbed by the squash) to fire the synchronize event.
-          git commit --allow-empty -m "chore(release): trigger CI on the release PR"
-          git push origin "$BRANCH"
           gh pr merge --auto --squash "$PR"
           MERGED=""
           for i in $(seq 1 120); do
