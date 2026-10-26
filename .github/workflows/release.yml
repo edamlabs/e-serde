@@ -79,8 +79,14 @@ jobs:
           uv lock
           PREV=$(git ls-remote --tags origin 'refs/tags/v*' | sed -E 's#.*/v##; s/\^\{\}$//' | sort -V | grep -vx "${TAG#v}" | tail -1)
           RANGE=${PREV:+v$PREV..HEAD}
-          { printf '## [%s] — %s\n\n' "${TAG#v}" "$(date -u +%Y-%m-%d)"; git log --no-merges --pretty='- %s' $RANGE | grep -vE '^- chore\(release\)' | sed '/^-$/d'; printf '\n'; } > /tmp/entry.md
-          awk 'NR==1{print;next} /^## \[/{if(!done){while((getline l<"/tmp/entry.md"))print l;done=1}print;next}{print}' CHANGELOG.md > /tmp/changelog.md && mv /tmp/changelog.md CHANGELOG.md
+          # [Unreleased] becomes the new version: its curated notes are the body; when it is empty, the commits are.
+          git log --no-merges --pretty='- %s' $RANGE | grep -vE '^- chore\(release\)' | sed '/^-$/d' > /tmp/entry.md
+          awk -v head="## [${TAG#v}] — $(date -u +%Y-%m-%d)" '
+            /^## \[Unreleased\]/ { print; print ""; print head; inside = 1; body = 0; next }
+            inside && /^## \[/ { if (!body) { while ((getline l < "/tmp/entry.md") > 0) print l; print "" } inside = 0 }
+            inside && NF { body = 1 }
+            { print }
+          ' CHANGELOG.md > /tmp/changelog.md && mv /tmp/changelog.md CHANGELOG.md
           git switch -c "$BRANCH"
           git add Cargo.toml Cargo.lock uv.lock CHANGELOG.md
           git commit -m "chore(release): $TAG"
