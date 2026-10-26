@@ -10,6 +10,8 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+## [0.6.2] — 2026-10-26
+
 Same codecs, same Python API: the project moves to the EDamLabs organisation.
 
 ### Changed
