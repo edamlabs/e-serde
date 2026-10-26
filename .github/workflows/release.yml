@@ -27,21 +27,28 @@ jobs:
     outputs:
       tag: ${{ steps.next.outputs.tag }}
     steps:
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
+        id: app
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: main
-          token: ${{ secrets.RELEASE_PAT }}
+          token: ${{ steps.app.outputs.token }}
           persist-credentials: false
           fetch-depth: 0
       - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4  # v10.1.0
       - name: Configure git identity and push credentials
         env:
-          RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
+          APP_TOKEN: ${{ steps.app.outputs.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config push.followTagsToPush false
-          git config http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf '%s:%s' 'x-access-token' "$RELEASE_PAT" | base64 -w0)"
+          git config http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf '%s:%s' 'x-access-token' "$APP_TOKEN" | base64 -w0)"
       - id: next
         env:
           BUMP: ${{ inputs.bump }}
@@ -81,7 +88,7 @@ jobs:
           PR=$(gh pr create -B main -H "$BRANCH" --title "chore(release): $TAG" --body "Automated release bump. Squash-merges itself once CI is green." 2>/dev/null | tail -n1 | awk -F/ '{print $NF}')
           PR=${PR:-$(gh pr view "$BRANCH" --json number -q .number)}
           [ -n "$PR" ] || { echo "::error::could not open or find the release PR" >&2; exit 1; }
-          ### GitHub suppresses CI on PRs opened by GITHUB_TOKEN: re-push as the PAT's human actor (one disposable commit, absorbed by the squash) to fire the synchronize event.
+          ### GitHub suppresses CI on PRs opened by GITHUB_TOKEN: re-push as the GitHub App (one disposable commit, absorbed by the squash) to fire the synchronize event.
           git commit --allow-empty -m "chore(release): trigger CI on the release PR"
           git push origin "$BRANCH"
           gh pr merge --auto --squash "$PR"
