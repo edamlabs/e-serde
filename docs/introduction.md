@@ -1,7 +1,7 @@
 # Introduction
 
-e-serde is part of the **Eager** (`e-`) stack by [damvolkov](https://github.com/damvolkov) —
-a family of local-first, production-grade components. e-serde is its serialization layer.
+e-serde is part of the **EDamLabs eager series** (`e-`) — EDamLabs' own local-first, production-grade
+components ([EDamLabs families](https://github.com/edamlabs/esteward#identity)). e-serde is its serialization layer.
 
 ## Why
 

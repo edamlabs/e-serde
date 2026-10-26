@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
-authors = [{ name = "damvolkov", email = "damvolkovv@gmail.com" }]
+authors = [{ name = "EDamLabs" }]
 keywords = ["e-stack", "config", "yaml", "toml", "jsonc", "ini", "msgspec"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -25,13 +25,18 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/damvolkov/e-serde"
-Source = "https://github.com/damvolkov/e-serde"
-Issues = "https://github.com/damvolkov/e-serde/issues"
-Changelog = "https://github.com/damvolkov/e-serde/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/edamlabs/e-serde"
+Source = "https://github.com/edamlabs/e-serde"
+Issues = "https://github.com/edamlabs/e-serde/issues"
+Changelog = "https://github.com/edamlabs/e-serde/blob/main/CHANGELOG.md"
 
 [project.scripts]
 e-serde = "eserde.main:main"
+
+### What this repository is in EDamLabs' taxonomy (https://github.com/edamlabs/esteward#identity).
+[tool.edamlabs]
+kind = "lib"
+family = "eager"
 
 [dependency-groups]
 lint = [
@@ -57,7 +62,7 @@ build = [
     "maturin>=1.10",
 ]
 docs = [
-    "mkdocs-material>=9.7",
+    "zensical>=0.0.71,<0.1",
 ]
 bench = [
     "pytest-benchmark>=5.3",

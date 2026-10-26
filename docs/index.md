@@ -11,6 +11,8 @@ hide:
   <code>msgspec</code> models. Two verbs, sync and async, one wheel.</p>
 </div>
 
+Part of the **EDamLabs eager series**: EDamLabs' own e- products ([EDamLabs families](https://github.com/edamlabs/esteward#identity)).
+
 <div class="rx-grid">
   <div><h3>Rust-fast</h3><p>JSON via <code>msgspec</code> (C); YAML, TOML, JSONC, INI via Rust. GIL released during decode.</p></div>
   <div><h3>Type-safe</h3><p>Pass <code>type=</code> and the tree is validated into a Struct, dataclass or TypedDict by msgspec.</p></div>

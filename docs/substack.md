@@ -1,6 +1,6 @@
 # e-serde: a config loader that takes typing, speed and your machine seriously
 
-> Copy-paste ready for Substack. Links: repo → https://github.com/damvolkov/e-serde · docs → https://damvolkov.github.io/e-serde/
+> Copy-paste ready for Substack. Links: repo → https://github.com/edamlabs/e-serde · docs → https://edamlabs.github.io/e-serde/
 
 ---
 
@@ -8,8 +8,8 @@ Every few months I catch myself rebuilding the same wheel: read a YAML here, a T
 
 So I built the door. It's called **e-serde** — part of my `e-` (eager) stack — and it's now public:
 
-- **Repo:** https://github.com/damvolkov/e-serde
-- **Docs:** https://damvolkov.github.io/e-serde/
+- **Repo:** https://github.com/edamlabs/e-serde
+- **Docs:** https://edamlabs.github.io/e-serde/
 
 ## What it is
 
@@ -67,7 +67,7 @@ uv add e-serde        # or: pip install e-serde
 
 Wheels for Linux (x86_64/aarch64), macOS (both) and Windows, CPython 3.14.
 
-- Repo: https://github.com/damvolkov/e-serde
-- Docs (per-format contracts, limits, examples): https://damvolkov.github.io/e-serde/
+- Repo: https://github.com/edamlabs/e-serde
+- Docs (per-format contracts, limits, examples): https://edamlabs.github.io/e-serde/
 
 Issues and uncomfortable critiques welcome. Agreement must be earned.

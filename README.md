@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/damvolkov/e-serde/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/damvolkov/e-serde/ci.yml?label=test" alt="CI"></a>
+  <a href="https://github.com/edamlabs/e-serde/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/edamlabs/e-serde/ci.yml?label=test" alt="CI"></a>
   <a href="https://pypi.org/project/e-serde/"><img src="https://img.shields.io/pypi/v/e-serde?color=166b7e" alt="PyPI"></a>
   <a href="https://pypi.org/project/e-serde/"><img src="https://img.shields.io/pypi/pyversions/e-serde" alt="Python"></a>
   <a href="LICENSE"><img src="https://img.shields.io/pypi/l/e-serde?color=166b7e" alt="License"></a>
@@ -14,8 +14,7 @@ format into native Python objects — and, when you ask, into frozen `msgspec` m
 Two verbs, `loads`/`dumps`, sync and async twins, one wheel. `json`-module semantics,
 strict typing, no surprises.
 
-Part of the **Eager** (`e-`) stack by [damvolkov](https://github.com/damvolkov), built on
-open-source engines — the speed and robustness of C and Rust, for serialization in Python.
+Part of the **EDamLabs eager series**: EDamLabs' own e- products ([EDamLabs families](https://github.com/edamlabs/esteward#identity)).
 
 ## Install
 
@@ -140,7 +139,7 @@ compat.loads('{"a": 1.5}', parse_float=Decimal)  # delegated to stdlib, never gu
 
 Errors are the `LoaderError` family: `FormatError` (no/unknown format), `LoadError`
 (decode or validation), `DumpError` / `EncoderError` (encode), `CodecError` (backend
-missing). The full guide lives at [damvolkov.github.io/e-serde](https://damvolkov.github.io/e-serde/).
+missing). The full guide lives at [edamlabs.github.io/e-serde](https://edamlabs.github.io/e-serde/).
 
 ## Formats and backends
 
@@ -157,7 +156,7 @@ missing). The full guide lives at [damvolkov.github.io/e-serde](https://damvolko
 The contract lives in code — `eserde.STANDARDS` — and `test_standards.py` executes every
 claim against the live codecs and the lockfiles. Bumping an engine or changing a format
 capability is a deliberate act, never silent drift. Full per-format pages (capabilities,
-limits, examples): [docs → Formats](https://damvolkov.github.io/e-serde/formats/).
+limits, examples): [docs → Formats](https://edamlabs.github.io/e-serde/formats/).
 
 Everything Rust is one extension module (`eserde._native`), compiled by `maturin` from
 `crates/native`. The only runtime dependency is `msgspec`.
@@ -198,7 +197,7 @@ tests/
   unit/eserde/          exact mirror of src
   benchmark/            rival matrix + report renderer
   resources/            canonical sample.* fixtures
-docs/                   mkdocs-material site
+docs/                   Zensical site
 ```
 
 Only the package root has an `__init__.py`; every subpackage is a namespace folder. Import

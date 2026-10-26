@@ -1,0 +1,9 @@
+# Configuration file for `prek`, a git hook framework written in Rust.
+# See https://prek.j178.dev for more information.
+#:schema https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "local"
+hooks = [
+    { id = "docs", name = "zensical strict build", entry = "uv run --no-sync zensical build --strict --clean", language = "system", files = '^(docs/|mkdocs\.yml$)', pass_filenames = false },
+]

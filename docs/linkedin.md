@@ -28,8 +28,8 @@ srv = eserde.loads(Path("prod.yaml"), type=Server)  # decode in Rust, validate w
 🔒 Built 100% with local open-weight models on local hardware. No cloud APIs, no telemetry — the tool that serializes your config shouldn't phone home, and neither should the hands that wrote it.
 
 🐍 Wheels on PyPI for Linux / macOS / Windows (cp314):
-📦 Repo: https://github.com/damvolkov/e-serde
-📖 Docs: https://damvolkov.github.io/e-serde/
+📦 Repo: https://github.com/edamlabs/e-serde
+📖 Docs: https://edamlabs.github.io/e-serde/
 
 Feedback and uncomfortable critiques welcome — agreement must be earned. 🤝
 
