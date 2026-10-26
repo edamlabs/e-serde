@@ -78,3 +78,5 @@ nav:
       - TSV: formats/tsv.md
   - Reference: reference.md
   - Benchmarks: benchmarks.md
+  - Project:
+      - Decisions: decisions.md

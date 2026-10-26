@@ -8,6 +8,21 @@ This file is maintained automatically: the release workflow appends the notes of
 every tagged version, and a CI test fails if the head of this file ever disagrees
 with `Cargo.toml`.
 
+## [Unreleased]
+
+Same codecs, same Python API: the project moves to the EDamLabs organisation.
+
+### Changed
+
+- Home: <https://github.com/edamlabs/e-serde>, documentation <https://edamlabs.github.io/e-serde/>; the old
+  `damvolkov/e-serde` URLs redirect. PyPI name `e-serde` and import name `eserde` unchanged; authorship EDamLabs.
+- Identity declared in `pyproject.toml` (`[tool.edamlabs]`: `kind = "lib"`, `family = "eager"`), README and docs.
+- Documentation built with Zensical in place of MkDocs + Material; `mkdocs.yml` kept; decisions log in the docs.
+- Renovate replaces Dependabot: Python tooling, actions, lock files, runtime patches and Rust crate patches merge
+  themselves once every required check passes; Rust minor/major wait for review; `saphyr` stays pinned.
+- Release workflow authenticates with the EDamLabs GitHub App token instead of a personal access token.
+- CI saves the Rust cache only from `main` and restores it on pull requests.
+
 ## [0.6.1] — 2026-10-02
 
 - feat(interpolate): compose-spec ${VAR:-default} expansion over decoded trees, native Rust (#37)
