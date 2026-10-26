@@ -42,10 +42,10 @@ bench: build-release ## rival benchmark matrix → charts in assets/benchmarks
 	rm -rf .benchmark
 
 docs-serve:       ## serve the documentation locally
-	uv run --group docs mkdocs serve -a 127.0.0.1:8000
+	uv run zensical serve -a 127.0.0.1:8000
 
 docs:             ## build the documentation (strict, fails on broken links)
-	uv run --group docs mkdocs build --strict
+	uv run zensical build --strict --clean
 
 docs-formats:     ## regenerate docs/formats/*.md from the STANDARDS contract
 	uv run python tools/gen_formats.py
