@@ -1,122 +1,46 @@
-name: Release
+##### RELEASE #####
+# Tag-driven release: esteward folds the CHANGELOG and bumps Cargo.toml in a self-merging release PR, then
+# pushes vX.Y.Z onto that PR's merge commit. This workflow builds the wheels and the sdist at the tag and
+# publishes them to PyPI through the `pypi` environment (trusted publishing).
+name: release
 
 on:
+  push:
+    tags: ["v*"]
   workflow_dispatch:
-    inputs:
-      bump:
-        description: Version increment (ignored when tag is set)
-        type: choice
-        default: patch
-        options: [patch, minor, major]
-      tag:
-        description: Republish an existing v* tag verbatim (empty = cut a new version)
-        type: string
-        default: ""
+
+permissions:
+  contents: read
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  bump:
-    name: Version + tag
+  notes:
+    name: GitHub release
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
-    outputs:
-      tag: ${{ steps.next.outputs.tag }}
     steps:
-      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
-        id: app
-        with:
-          client-id: ${{ vars.APP_CLIENT_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          ref: main
-          token: ${{ steps.app.outputs.token }}
           persist-credentials: false
-          fetch-depth: 0
-      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4  # v10.1.0
-      - name: Configure git identity and push credentials
-        env:
-          APP_TOKEN: ${{ steps.app.outputs.token }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config push.followTagsToPush false
-          git config http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf '%s:%s' 'x-access-token' "$APP_TOKEN" | base64 -w0)"
-      - id: next
-        env:
-          BUMP: ${{ inputs.bump }}
-          GIVEN: ${{ inputs.tag }}
-        run: |
-          if [ -n "$GIVEN" ]; then echo "tag=$GIVEN" >> "$GITHUB_OUTPUT"; exit 0; fi
-          LATEST=$(git ls-remote --tags origin 'refs/tags/v*' | sed -E 's#.*/v##; s/\^\{\}$//' | sort -V | tail -1)
-          if [ -n "$LATEST" ]; then
-            IFS=. read -r M m p <<< "$LATEST"
-            case "$BUMP" in
-              major) M=$((M+1)); m=0; p=0 ;;
-              minor) m=$((m+1)); p=0 ;;
-              *) p=$((p+1)) ;;
-            esac
-          else
-            read -r M m p <<< "$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2 | tr . ' ')"
-          fi
-          echo "tag=v$M.$m.$p" >> "$GITHUB_OUTPUT"
-      - name: Sync Cargo/uv, open release PR, tag once merged
-        if: inputs.tag == ''
-        env:
-          TAG: ${{ steps.next.outputs.tag }}
-          GH_TOKEN: ${{ steps.app.outputs.token }}
-        run: |
-          BRANCH="chore/release-${TAG#v}"
-          sed -i "0,/^version = \"[0-9]*\.[0-9]*\.[0-9]*\"/s//version = \"${TAG#v}\"/" Cargo.toml
-          cargo update --workspace
-          uv lock
-          PREV=$(git ls-remote --tags origin 'refs/tags/v*' | sed -E 's#.*/v##; s/\^\{\}$//' | sort -V | grep -vx "${TAG#v}" | tail -1)
-          RANGE=${PREV:+v$PREV..HEAD}
-          # [Unreleased] becomes the new version: its curated notes are the body; when it is empty, the commits are.
-          git log --no-merges --pretty='- %s' $RANGE | grep -vE '^- chore\(release\)' | sed '/^-$/d' > /tmp/entry.md
-          awk -v head="## [${TAG#v}] — $(date -u +%Y-%m-%d)" '
-            /^## \[Unreleased\]/ { print; print ""; print head; inside = 1; body = 0; next }
-            inside && /^## \[/ { if (!body) { while ((getline l < "/tmp/entry.md") > 0) print l; print "" } inside = 0 }
-            inside && NF { body = 1 }
-            { print }
-          ' CHANGELOG.md > /tmp/changelog.md && mv /tmp/changelog.md CHANGELOG.md
-          git switch -c "$BRANCH"
-          git add Cargo.toml Cargo.lock uv.lock CHANGELOG.md
-          git commit -m "chore(release): $TAG"
-          git push -f origin "$BRANCH"
-          PR=$(gh pr create -B main -H "$BRANCH" --title "chore(release): $TAG" --body "Automated release bump. Squash-merges itself once CI is green." | tail -n1 | awk -F/ '{print $NF}')
-          PR=${PR:-$(gh pr view "$BRANCH" --json number -q .number)}
-          [ -n "$PR" ] || { echo "::error::could not open or find the release PR" >&2; exit 1; }
-          gh pr merge --auto --squash "$PR"
-          MERGED=""
-          for i in $(seq 1 120); do
-            MERGED=$(gh pr view "$PR" --json mergedAt -q .mergedAt)
-            [ -n "$MERGED" ] && [ "$MERGED" != "null" ] && break
-            sleep 10
-          done
-          [ -n "$MERGED" ] && [ "$MERGED" != "null" ] || { echo "::error::release PR #$PR did not merge within 20 minutes" >&2; exit 1; }
-          SHA=$(gh pr view "$PR" --json mergeCommit -q .mergeCommit.oid)
-          [ -n "$SHA" ] && [ "$SHA" != "null" ] || { echo "::error::PR #$PR merged without a merge commit" >&2; exit 1; }
-          git fetch -q origin main
-          [ "$(git rev-parse origin/main)" = "$SHA" ] || { echo "::error::main is not at PR #$PR's merge commit — refusing to tag" >&2; exit 1; }
-          git tag "$TAG" "$SHA"
-          git push origin "$TAG"
-      - name: GitHub release
+      - name: verify the tag against Cargo.toml, then open the release with the changelog section as notes
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.next.outputs.tag }}
-        run: gh release create "$TAG" --latest --verify-tag --notes-file <(awk -v s="## [${TAG#v}]" 'index($0,s)==1{p=1} p && /^## \[/ && index($0,s)!=1{exit} p' CHANGELOG.md) || gh release edit "$TAG" --latest=true
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version="$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')"
+          if [ "v${version}" != "${TAG}" ]; then
+            echo "::error::tag ${TAG} does not match Cargo.toml version ${version}" >&2
+            exit 1
+          fi
+          gh release create "$TAG" --latest --verify-tag --notes-file <(awk -v s="## [${TAG#v}]" 'index($0,s)==1{p=1} p && /^## \[/ && index($0,s)!=1{exit} p' CHANGELOG.md) || gh release edit "$TAG" --latest=true
 
   wheels:
     name: wheels (${{ matrix.os }}/${{ matrix.target }})
-    needs: bump
     strategy:
       fail-fast: false
       matrix:
@@ -139,12 +63,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          ref: ${{ needs.bump.outputs.tag }}
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: "3.14"
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6  # v2.9.2
       - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b  # v1.51.0
         with:
           target: ${{ matrix.target }}
@@ -158,16 +80,13 @@ jobs:
 
   sdist:
     name: sdist
-    needs: bump
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          ref: ${{ needs.bump.outputs.tag }}
           persist-credentials: false
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6  # v2.9.2
       - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b  # v1.51.0
         with:
           command: sdist
@@ -180,11 +99,11 @@ jobs:
 
   publish:
     name: Publish to PyPI
-    needs: [bump, wheels, sdist]
+    needs: [wheels, sdist]
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/e-serde/${{ needs.bump.outputs.tag }}
+      url: https://pypi.org/project/e-serde/${{ github.ref_name }}
     permissions:
       contents: read
       id-token: write
