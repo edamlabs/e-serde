@@ -21,9 +21,9 @@
     <rect x="1506" y="128" width="45"  height="239"/>
     <rect x="1476" y="367" width="75"  height="197"/>
     <rect x="1588" y="128" width="45"  height="436"/>
-    <rect x="1798" y="128" width="45"  height="436"/>
-    <rect x="1588" y="128" width="255" height="45"/>
-    <rect x="1588" y="519" width="255" height="45"/>
+    <rect x="1588" y="128" width="210" height="45"/>
+    <rect x="1588" y="519" width="210" height="45"/>
+    <rect x="1798" y="173" width="45"  height="346"/>
     <rect x="1880" y="128" width="49"  height="436"/>
     <rect x="1880" y="128" width="255" height="45"/>
     <rect x="1880" y="300" width="219" height="45"/>
