@@ -52,11 +52,6 @@ def _leaf(obj: Any) -> Any:
             raise EncoderError(msg)
 
 
-@_leaf.register(msgspec.Struct)
-def _leaf_struct(obj: msgspec.Struct) -> Any:
-    return msgspec.to_builtins(obj)
-
-
 @_leaf.register(bytes)
 @_leaf.register(bytearray)
 def _leaf_bytes(obj: bytes | bytearray) -> str:
@@ -102,6 +97,10 @@ def _walk(obj: Any, hooks: _Hooks) -> Any:
             return {_key(key, hooks): _walk(value, hooks) for key, value in obj.items()}
         case list() | tuple() | set() | frozenset() | range():
             return [_walk(item, hooks) for item in obj]
+        case msgspec.Struct():
+            # msgspec keeps the Struct's own config (rename, tags, omit_defaults); what it cannot encode inside it
+            # comes back through the same walk, so `encoders` and `default` reach every field.
+            return msgspec.to_builtins(obj, enc_hook=lambda inner: _walk(inner, hooks))
         case _:
             return _walk(_resolve_leaf(obj, hooks), hooks)
 
