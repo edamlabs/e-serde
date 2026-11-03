@@ -10,6 +10,12 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+### Fixed
+
+- Docs: the banner, the logo and every benchmark chart now reach the site — `docs/assets` was one symlink to a
+  folder, which Zensical does not copy (404 on edamlabs.github.io/e-serde); it is now a folder of file symlinks.
+- README wordmark redrawn with the fixed house font: the D no longer renders as an O (`E-SEROE`).
+
 ## [0.6.2] — 2026-10-26
 
 Same codecs, same Python API: the project moves to the EDamLabs organisation.
