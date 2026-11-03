@@ -10,6 +10,8 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+## [0.6.4] — 2026-11-03
+
 ### Fixed
 
 - `encode`/`dumps`: a `msgspec.Struct` is walked with the call's hooks — an object msgspec cannot encode inside a
