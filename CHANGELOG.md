@@ -10,6 +10,12 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+### Fixed
+
+- `encode`/`dumps`: a `msgspec.Struct` is walked with the call's hooks — an object msgspec cannot encode inside a
+  Struct now meets `encoders` and `default` like anywhere else, instead of raising `TypeError` (`default=str` was
+  ignored). The Struct's own config (rename, tags) still holds. Found by e-track's viewer streaming LangChain payloads.
+
 ## [0.6.3] — 2026-11-03
 
 ### Fixed

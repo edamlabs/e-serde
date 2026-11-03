@@ -38,6 +38,16 @@ class _Vec(msgspec.Struct, frozen=True):
     y: int
 
 
+class _Opaque:
+    def __str__(self) -> str:
+        return "opaque"
+
+
+class _Bag(msgspec.Struct, frozen=True, rename="camel"):
+    held_value: object
+    point: object = None
+
+
 _PRIMITIVE_CASES: list[tuple[object, object]] = [
     (None, None),
     (True, True),
@@ -135,6 +145,17 @@ async def test_encode_dataclass() -> None:
 
 async def test_encode_msgspec_struct_frozen() -> None:
     assert encode(_Vec(1, 2)) == {"x": 1, "y": 2}
+
+
+async def test_encode_struct_fields_take_the_hooks() -> None:
+    ### a foreign object inside a Struct meets the same rules as anywhere else; the Struct's own config still holds.
+    bag = _Bag(held_value=_Opaque(), point=_Point(1, 2))
+    assert encode(bag, default=str) == {"heldValue": "opaque", "point": {"x": 1, "y": 2}}
+
+
+async def test_encode_struct_foreign_field_without_default_raises() -> None:
+    with pytest.raises(EncoderError, match="_Opaque"):
+        encode(_Bag(held_value=_Opaque()))
 
 
 async def test_encode_nested_combination() -> None:
