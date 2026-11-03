@@ -10,6 +10,8 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+## [0.6.3] — 2026-11-03
+
 ### Fixed
 
 - Docs: the banner, the logo and every benchmark chart now reach the site — `docs/assets` was one symlink to a
