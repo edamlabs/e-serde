@@ -6,6 +6,7 @@ use saphyr::LoadableYamlNode;
 use saphyr::{Scalar, Yaml};
 use saphyr_parser::{BufferedInput, Event, Parser};
 use std::collections::HashMap;
+use std::fmt::Write;
 
 /// Cap on materialized nodes while flattening the `Rc`-shared alias graph:
 /// ordinary configs are orders of magnitude below this; exponential alias
@@ -267,14 +268,58 @@ fn emit_sequence(items: &[Node], indent: usize, out: &mut String) {
 
 fn emit_token(text: &str) -> String {
     if text_needs_quotes(text) {
-        format!("{:?}", text)
+        quote(text)
     } else {
         text.to_string()
     }
 }
 
+fn quote(text: &str) -> String {
+    let mut out = String::with_capacity(text.len() + 2);
+    out.push('"');
+    text.chars().for_each(|c| push_escaped(c, &mut out));
+    out.push('"');
+    out
+}
+
+fn push_escaped(c: char, out: &mut String) {
+    match c {
+        '"' => out.push_str("\\\""),
+        '\\' => out.push_str("\\\\"),
+        '\0' => out.push_str("\\0"),
+        '\x07' => out.push_str("\\a"),
+        '\x08' => out.push_str("\\b"),
+        '\t' => out.push_str("\\t"),
+        '\n' => out.push_str("\\n"),
+        '\x0b' => out.push_str("\\v"),
+        '\x0c' => out.push_str("\\f"),
+        '\r' => out.push_str("\\r"),
+        '\x1b' => out.push_str("\\e"),
+        '\u{85}' => out.push_str("\\N"),
+        '\u{2028}' => out.push_str("\\L"),
+        '\u{2029}' => out.push_str("\\P"),
+        c if is_printable(c) => out.push(c),
+        c => {
+            let _ = match u32::from(c) {
+                n @ ..=0xFF => write!(out, "\\x{n:02X}"),
+                n @ ..=0xFFFF => write!(out, "\\u{n:04X}"),
+                n => write!(out, "\\U{n:08X}"),
+            };
+        }
+    }
+}
+
+/// YAML 1.2 `nb-char` minus tab: what a plain or double-quoted scalar may carry literally.
+fn is_printable(c: char) -> bool {
+    matches!(c, '\x20'..='\x7E' | '\u{A0}'..='\u{D7FF}' | '\u{E000}'..='\u{FFFD}' | '\u{10000}'..)
+        && c != '\u{FEFF}'
+}
+
 fn text_needs_quotes(text: &str) -> bool {
     if text.is_empty() || text.trim() != text {
+        return true;
+    }
+    if text.chars().any(|c| c != '\\' && !is_printable(c)) {
         return true;
     }
     if text.contains([':', '#', '\n', '"', '\''])

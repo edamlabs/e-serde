@@ -10,6 +10,13 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+### Fixed
+
+- YAML `dumps`: strings are double-quoted with YAML escapes (`\e`, `\0`, `\xHH`, `\N`, `\L`, `\P`, `\uHHHH`…)
+  instead of Rust's debug form (`\u{1b}`), which `loads` rejected; any non-printable character now forces quoting,
+  so a raw NUL no longer truncates the value and a raw CR no longer breaks the line. Printable Unicode stays
+  literal. Found by todomemory dumping ANSI-coloured logs.
+
 ## [0.6.4] — 2026-11-03
 
 ### Fixed
