@@ -10,6 +10,13 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+### Fixed
+
+- YAML `dumps`: a sequence nested in a sequence wrote its first item two columns deeper than the rest
+  (`-   - a` then `  - b`), which `loads` — and every YAML parser — rejected. The first item now follows its parent's
+  dash on the same line (`- - a` then `  - b`), at any depth, with mappings inside too. Found by todomemory writing
+  pairs (`[[older, newer], …]`).
+
 ## [0.6.5] — 2026-11-04
 
 ### Fixed
