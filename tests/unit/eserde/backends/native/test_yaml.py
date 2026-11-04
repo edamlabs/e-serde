@@ -62,6 +62,25 @@ async def test_dumps_sequence_of_mappings_alignment(codec: NativeYamlCodec) -> N
     assert codec.dumps(payload) == b"rows:\n- i: 1\n  name: a\n- i: 2\n  name: b\n"
 
 
+async def test_dumps_escapes_ansi_log(codec: NativeYamlCodec) -> None:
+    line = "\x1b[31mERROR\x1b[0m: boom"
+    assert codec.dumps({"log": line}) == b'log: "\\e[31mERROR\\e[0m: boom"\n'
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "".join(map(chr, range(0x100))),
+        "\u2028\u2029\ufeff\ufffe\uffff",
+        "e\u0301: \U0001f600",
+        "a\x00b",
+    ],
+)
+async def test_roundtrip_non_printable(codec: NativeYamlCodec, text: str) -> None:
+    payload = {text: text}
+    assert codec.loads(codec.dumps(payload)) == payload
+
+
 async def test_loads_multi_document_raises(codec: NativeYamlCodec) -> None:
     with pytest.raises(LoadError, match="exactly one"):
         codec.loads(b"a: 1\n---\nb: 2\n")
