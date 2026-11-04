@@ -10,6 +10,8 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+## [0.6.5] — 2026-11-04
+
 ### Fixed
 
 - YAML `dumps`: strings are double-quoted with YAML escapes (`\e`, `\0`, `\xHH`, `\N`, `\L`, `\P`, `\uHHHH`…)
