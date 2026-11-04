@@ -10,6 +10,8 @@ with `Cargo.toml`.
 
 ## [Unreleased]
 
+## [0.6.6] — 2026-11-04
+
 ### Fixed
 
 - YAML `dumps`: a sequence nested in a sequence wrote its first item two columns deeper than the rest
