@@ -245,16 +245,24 @@ fn emit_mapping_padded(
 }
 
 fn emit_sequence(items: &[Node], indent: usize, out: &mut String) {
+    emit_sequence_padded(items, indent, true, out);
+}
+
+/// A sequence's items at `indent`; the first one unpadded when it follows a parent's `- ` on the same line, as a
+/// sequence nested in a sequence does — every dash of one sequence in one column.
+fn emit_sequence_padded(items: &[Node], indent: usize, pad_first: bool, out: &mut String) {
     let pad = " ".repeat(indent);
-    for item in items {
-        out.push_str(&pad);
+    for (position, item) in items.iter().enumerate() {
+        if position > 0 || pad_first {
+            out.push_str(&pad);
+        }
         out.push_str("- ");
         match item {
             Node::Map(nested) if !nested.is_empty() => {
                 emit_mapping_padded(nested, indent + 2, false, out);
             }
             Node::Seq(nested) if !nested.is_empty() => {
-                emit_sequence(nested, indent + 2, out);
+                emit_sequence_padded(nested, indent + 2, false, out);
             }
             Node::Map(_) => out.push_str("{}\n"),
             Node::Seq(_) => out.push_str("[]\n"),

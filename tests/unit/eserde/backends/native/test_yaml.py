@@ -62,6 +62,25 @@ async def test_dumps_sequence_of_mappings_alignment(codec: NativeYamlCodec) -> N
     assert codec.dumps(payload) == b"rows:\n- i: 1\n  name: a\n- i: 2\n  name: b\n"
 
 
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"n": [["a", "b"], ["c", "d"]]},
+        [[1, 2], [3]],
+        {"deep": [[[1, 2], [3]], [4]]},
+        {"rows": [[{"i": 1, "name": "a"}, {"i": 2}], []]},
+    ],
+    ids=["pairs", "top-level", "deep", "mappings-inside"],
+)
+async def test_roundtrip_nested_sequences(codec: NativeYamlCodec, payload: object) -> None:
+    assert codec.loads(codec.dumps(payload)) == payload
+
+
+async def test_dumps_nested_sequence_alignment(codec: NativeYamlCodec) -> None:
+    """Every dash of one sequence in one column: the first item follows its parent's dash on the same line."""
+    assert codec.dumps({"rows": [["a", "b"], ["c"]]}) == b"rows:\n- - a\n  - b\n- - c\n"
+
+
 async def test_dumps_escapes_ansi_log(codec: NativeYamlCodec) -> None:
     line = "\x1b[31mERROR\x1b[0m: boom"
     assert codec.dumps({"log": line}) == b'log: "\\e[31mERROR\\e[0m: boom"\n'
