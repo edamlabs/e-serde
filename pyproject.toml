@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin>=1.10"]
+requires = ["maturin>=1.16.0"]
 build-backend = "maturin"
 
 [project]
@@ -40,45 +40,45 @@ family = "eager"
 
 [dependency-groups]
 lint = [
-    "ruff>=0.16",
-    "ty>=0.0.75",
-    "tach>=0.30",
-    "validate-pyproject[all]>=0.26",
-    "zizmor>=1.25",
+    "ruff>=0.17.4",
+    "ty>=0.0.99",
+    "tach>=0.35.3",
+    "validate-pyproject[all]>=0.27",
+    "zizmor>=1.32.0",
 ]
 test = [
-    "pytest>=9.1",
-    "pytest-asyncio>=1.4",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1.post1",
     "pytest-cov>=7.1",
     "pytest-xdist[psutil]>=3.8",
     "pytest-randomly>=5.0",
     "pytest-timeout>=2.4",
-    "pytest-mock>=3.15",
-    "inline-snapshot>=0.30",
+    "pytest-mock>=3.17.0",
+    "inline-snapshot>=0.36.1",
     "dirty-equals>=0.11",
-    "hypothesis>=6.150",
+    "hypothesis>=6.170.15",
 ]
 build = [
-    "maturin>=1.10",
+    "maturin>=1.16.0",
 ]
 docs = [
-    "zensical>=0.0.71,<0.1",
+    "zensical>=0.1.0,<0.2",
 ]
 bench = [
-    "pytest-benchmark>=5.3",
-    "matplotlib>=3.11",
-    "pydantic>=2.13",
-    "orjson>=3.12",
-    "ujson>=6.0",
-    "simplejson>=4.1",
+    "pytest-benchmark>=5.3.1",
+    "matplotlib>=3.11.2",
+    "pydantic>=2.14.3",
+    "orjson>=3.13.0",
+    "ujson>=6.1.0",
+    "simplejson>=4.2.0",
     "pyyaml>=6.0.3",
-    "ruamel.yaml>=0.19",
-    "json5>=0.15",
-    "pyjson5>=2.0",
-    "rtoml>=0.13",
-    "tomli>=2.4",
+    "ruamel.yaml>=0.19.1",
+    "json5>=0.17.3",
+    "pyjson5>=2.0.1",
+    "rtoml>=0.14.0",
+    "tomli>=2.5.0",
     "tomli-w>=1.2",
-    "tomlkit>=0.15",
+    "tomlkit>=0.15.2",
 ]
 dev = [
     { include-group = "lint" },
@@ -87,7 +87,7 @@ dev = [
     { include-group = "bench" },
     { include-group = "docs" },
     "polars>=1.44.2",
-    "prek>=0.4",
+    "prek>=0.5.10",
 ]
 
 [tool.uv]
