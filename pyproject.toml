@@ -86,7 +86,7 @@ dev = [
     { include-group = "build" },
     { include-group = "bench" },
     { include-group = "docs" },
-    "polars>=1.44.2",
+    "polars>=2.1.0",
     "prek>=0.4",
 ]
 
